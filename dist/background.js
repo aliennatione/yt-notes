@@ -1,0 +1,1 @@
+chrome.runtime.onInstalled.addListener(()=>{console.log(`[YT Notes] installed`)}),chrome.runtime.onMessage.addListener((e,t,n)=>e?.type===`ping`&&(n({ok:!0,ts:Date.now()}),!0));
