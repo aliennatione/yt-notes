@@ -8,5 +8,23 @@
   <label>Layout:
     <select id="layout"><option value="side">Side panel</option><option value="float">Overlay flottante</option></select>
   </label>
+  <script>
+    (function () {
+      var sem = document.getElementById('semantic');
+      var layout = document.getElementById('layout');
+      try {
+        chrome.storage.local.get(['semantic', 'layout'], function (r) {
+          if (r.semantic) sem.checked = true;
+          if (r.layout) layout.value = r.layout;
+        });
+        sem.addEventListener('change', function () {
+          chrome.storage.local.set({ semantic: sem.checked });
+        });
+        layout.addEventListener('change', function () {
+          chrome.storage.local.set({ layout: layout.value });
+        });
+      } catch (e) { console.warn('[YT Notes] storage non disponibile', e); }
+    })();
+  </script>
 </body>
 </html>

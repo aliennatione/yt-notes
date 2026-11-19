@@ -1,11 +1,16 @@
 import { h, render } from 'preact';
-import { useState, useEffect, useRef } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
 import { getVideoId, getCaptionTracks, fetchCaptions, pickTrack, type Caption } from '../lib/captions';
 import { seek, currentTime } from '../lib/player';
 import { exactSearch, fuzzySearch, semanticSearch } from '../lib/search';
-import { getDB, saveVideo, getVideo, saveHighlight, getHighlights, deleteHighlight, type Highlight } from '../lib/db';
+import { saveVideo, getVideo, saveHighlight, getHighlights, deleteHighlight, type Highlight } from '../lib/db';
 
-function uid() { return Math.random().toString(36).slice(2); }
+function uid() {
+  try {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID();
+  } catch { /* fallback */ }
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
 
 function Panel() {
   const [caps, setCaps] = useState<Caption[]>([]);
@@ -70,7 +75,7 @@ function Panel() {
       <div style={{marginTop:'4px', display:'flex', gap:'4px', flexWrap:'wrap'}}>
         <button onClick={()=>doSearch('exact')}>Esatta</button>
         <button onClick={()=>doSearch('fuzzy')}>Fuzzy</button>
-        <button onClick={()=>{setSemantic(s=>!s); if(!semantic) doSearch('semantic');}}>{semantic?'Semantica ON':'Semantica OFF'}</button>
+        <button onClick={()=>{ const next = !semantic; setSemantic(next); if(next) doSearch('semantic'); }}>{semantic?'Semantica ON':'Semantica OFF'}</button>
         {semantic && <button onClick={()=>doSearch('semantic')}>Semantica</button>}
       </div>
       {results.length>0 && (
@@ -117,6 +122,7 @@ function Panel() {
 }
 
 function mount() {
+  if (document.getElementById('yt-notes-root')) return;
   const host = document.createElement('div');
   host.id = 'yt-notes-root';
   document.body.appendChild(host);

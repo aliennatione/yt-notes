@@ -1,8 +1,10 @@
 export interface Caption { start: number; end: number; text: string; }
 
 export function getVideoId(): string | null {
-  const u = new URL(location.href);
-  return u.searchParams.get('v');
+  try {
+    const u = new URL(location.href);
+    return u.searchParams.get('v');
+  } catch { return null; }
 }
 
 export function getCaptionTracks(): any[] {
@@ -13,7 +15,8 @@ export function getCaptionTracks(): any[] {
 }
 
 export async function fetchCaptions(trackUrl: string): Promise<Caption[]> {
-  const url = trackUrl.includes('fmt=') ? trackUrl : trackUrl + '&fmt=json3';
+  let url = trackUrl;
+  if (!url.includes('fmt=')) url += (url.includes('?') ? '&' : '?') + 'fmt=json3';
   const res = await fetch(url);
   const data = await res.json();
   const caps: Caption[] = [];
